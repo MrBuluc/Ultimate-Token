@@ -56,3 +56,67 @@ library UltimateMapping {
         _;
     }
 }
+
+contract UltimateToken {
+    using UltimateMapping for UltimateMapping.Map;
+
+    UltimateMapping.Map private balances;
+
+    uint private _totalSupply;
+
+    string private _name;
+    string private _symbol;
+
+    event Transfer(address indexed from, address indexed to, uint value);
+
+    constructor() {
+        _name = "UltimateToken";
+        _symbol = "UTN";
+    }
+
+    function name() public view virtual returns (string memory) {
+        return _name;
+    }
+
+    function symbol() public view virtual returns (string memory) {
+        return _symbol;
+    }
+
+    function decimals() public view virtual returns (uint8) {
+        return 2;
+    }
+
+    function totalSupply() public view virtual returns (uint) {
+        return _totalSupply;
+    }
+
+    function balanceOf(address account) public view virtual returns (uint) {
+        return balances.get(account);
+    }
+
+    function transfer(address to, uint amount) public virtual returns (bool) {
+        address from = msg.sender;
+        require(from != address(0), "Transfer from the zero address");
+        require(to != address(0), "Transfer to the zero address");
+
+        uint fromBalance = balances.get(from);
+        require(fromBalance >= amount, "Transfer amount greater than balance");
+    unchecked {
+        balances.set(from, fromBalance - amount);
+        balances.set(to, balances.get(to) + amount);
+    }
+
+        emit Transfer(from, to, amount);
+        return true;
+    }
+
+    function mint(address account, uint amount) internal virtual {
+        require(account != address(0), "Mint to the 0 address");
+
+        _totalSupply += amount;
+    unchecked {
+        balances.set(account, balances.get(account) + amount);
+    }
+        emit Transfer(address(0), account, amount);
+    }
+}
