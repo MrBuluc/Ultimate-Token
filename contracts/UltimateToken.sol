@@ -103,10 +103,10 @@ contract UltimateToken {
 
         uint fromBalance = balances.get(from);
         require(fromBalance >= amount, "Transfer amount greater than balance");
-    unchecked {
-        balances.set(from, fromBalance - amount);
-        balances.set(to, balances.get(to) + amount);
-    }
+        unchecked {
+            balances.set(from, fromBalance - amount);
+            balances.set(to, balances.get(to) + amount);
+        }
 
         emit Transfer(from, to, amount);
         return true;
@@ -116,9 +116,9 @@ contract UltimateToken {
         require(account != address(0), "Mint to the 0 address");
 
         _totalSupply += amount;
-    unchecked {
-        balances.set(account, amount);
-    }
+        unchecked {
+            balances.set(account, amount);
+        }
         emit Transfer(address(0), account, amount);
     }
 }
