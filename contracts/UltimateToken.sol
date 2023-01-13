@@ -9,12 +9,12 @@ library UltimateMapping {
         mapping(address => bool) inserted;
     }
 
-    function get(Map storage map, address key) public view isKeyInserted(map, key) returns (uint) {
+    function get(Map storage map, address key) public view returns (uint) {
         return map.values[key];
     }
 
-    function getKeyAtIndex(Map storage map, uint index) public view returns (address) {
-        require(index < map.keys.length, "ArrayOutOfBound Exception");
+    function getKeyAtIndex(Map storage map, uint index) public view checkIndex(map, index) returns
+        (address) {
         return map.keys[index];
     }
 
@@ -51,8 +51,9 @@ library UltimateMapping {
         map.keys[index] = lastKey;
         map.keys.pop();
     }
-    modifier isKeyInserted(Map storage map, address key) {
-        require(map.inserted[key], "There is no value for this address");
+
+    modifier checkIndex(Map storage map, uint index) {
+        require(index < map.keys.length, "ArrayOutOfBound Exception");
         _;
     }
 }
@@ -69,9 +70,10 @@ contract UltimateToken {
 
     event Transfer(address indexed from, address indexed to, uint value);
 
-    constructor() {
+    constructor(uint initialSupply) {
         _name = "UltimateToken";
         _symbol = "UTN";
+        mint(msg.sender, initialSupply);
     }
 
     function name() public view virtual returns (string memory) {
@@ -115,7 +117,7 @@ contract UltimateToken {
 
         _totalSupply += amount;
     unchecked {
-        balances.set(account, balances.get(account) + amount);
+        balances.set(account, amount);
     }
         emit Transfer(address(0), account, amount);
     }
