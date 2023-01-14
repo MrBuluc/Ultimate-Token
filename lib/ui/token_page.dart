@@ -1,4 +1,7 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+import 'package:ultimate_token/model/transaction.dart';
 
 class TokenPage extends StatefulWidget {
   const TokenPage({Key? key}) : super(key: key);
@@ -17,56 +20,124 @@ class _TokenPageState extends State<TokenPage> {
   TextEditingController recipientAddressCnt = TextEditingController();
   TextEditingController amountCnt = TextEditingController();
 
-  String name = "UltimateToken",
-      symbol = "UTN",
-      totalSupply = "1000000",
-      balance = "1000000";
+  String name = "", symbol = "", totalSupply = "", balance = "";
+
+  List<Transaction> transactions = [];
+
+  Decoration boxDecoration = BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(20),
+      boxShadow: [
+        BoxShadow(
+            color: Colors.black.withOpacity(.2),
+            spreadRadius: 5,
+            blurRadius: 7,
+            offset: const Offset(0, 3))
+      ]);
+
+  late Size size;
 
   @override
   Widget build(BuildContext context) {
+    size = MediaQuery.of(context).size;
+
     return SafeArea(
       child: Scaffold(
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 10),
-            child: Column(
-              children: [
-                const Text(
-                  "Read from Token",
-                  style: TextStyle(fontSize: 20),
-                ),
-                buildContainer(tokenAddressFormKey, [
-                  buildTextFormField(
-                      tokenAddressCnt, "Token Address", checkAddress),
-                  buildButton("Get Token Info"),
-                  buildInfoText("Name: ", name),
-                  buildInfoText("Symbol: ", symbol),
-                  buildInfoText("Total Supply: ", totalSupply),
-                  Form(
-                    key: walletAddressFormKey,
-                    child: Padding(
+        body: SingleChildScrollView(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: Column(
+                children: [
+                  const Text(
+                    "Read from Token",
+                    style: TextStyle(fontSize: 20),
+                  ),
+                  buildContainer(tokenAddressFormKey, [
+                    buildTextFormField(
+                        tokenAddressCnt, "Token Address", checkAddress),
+                    buildButton("Get Token Info"),
+                    buildInfoText("Name: ", name),
+                    buildInfoText("Symbol: ", symbol),
+                    buildInfoText("Total Supply: ", totalSupply),
+                    Form(
+                      key: walletAddressFormKey,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 10),
+                        child: buildTextFormField(
+                            walletAddressCnt, "Wallet Address", checkAddress),
+                      ),
+                    ),
+                    buildButton("Get My Balance")
+                  ]),
+                  const Text(
+                    "Transfer Token",
+                    style: TextStyle(fontSize: 20),
+                  ),
+                  buildContainer(transferFormKey, [
+                    buildTextFormField(
+                        recipientAddressCnt, "Recipient Address", checkAddress),
+                    Padding(
                       padding: const EdgeInsets.only(top: 10),
                       child: buildTextFormField(
-                          walletAddressCnt, "Wallet Address", checkAddress),
+                          amountCnt, "Amount to Transfer", checkAmount),
                     ),
+                    buildButton("Transfer")
+                  ]),
+                  const Text(
+                    "Transactions",
+                    style: TextStyle(fontSize: 20),
                   ),
-                  buildButton("Get My Balance")
-                ]),
-                const Text(
-                  "Transfer Token",
-                  style: TextStyle(fontSize: 20),
-                ),
-                buildContainer(transferFormKey, [
-                  buildTextFormField(
-                      recipientAddressCnt, "Recipient Address", checkAddress),
                   Padding(
-                    padding: const EdgeInsets.only(top: 10),
-                    child: buildTextFormField(
-                        amountCnt, "Amount to Transfer", checkAmount),
-                  ),
-                  buildButton("Transfer")
-                ])
-              ],
+                    padding: const EdgeInsets.all(10),
+                    child: Container(
+                      decoration: boxDecoration,
+                      child: Column(
+                        children: [
+                          ListView.builder(
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: transactions.length,
+                            shrinkWrap: true,
+                            itemBuilder: (context, index) {
+                              Transaction transaction = transactions[index];
+                              return Card(
+                                color: Color(
+                                        (math.Random().nextDouble() * 0xFFFFFF)
+                                            .toInt())
+                                    .withOpacity(1),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10)),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Column(
+                                      mainAxisSize: MainAxisSize.max,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: [
+                                        buildText("From: ", transaction.from),
+                                        buildText("To: ", transaction.to),
+                                        buildText(
+                                            "Amount: ", transaction.amount),
+                                        TextButton(
+                                          child: const Text(
+                                              "Check in block explorer"),
+                                          onPressed: () {},
+                                        ),
+                                      ],
+                                    )
+                                  ],
+                                ),
+                              );
+                            },
+                          )
+                        ],
+                      ),
+                    ),
+                  )
+                ],
+              ),
             ),
           ),
         ),
@@ -77,16 +148,8 @@ class _TokenPageState extends State<TokenPage> {
   Widget buildContainer(Key key, List<Widget> children) => Padding(
         padding: const EdgeInsets.all(10),
         child: Container(
-          decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                    color: Colors.black.withOpacity(.2),
-                    spreadRadius: 5,
-                    blurRadius: 7,
-                    offset: const Offset(0, 3))
-              ]),
+          width: size.width,
+          decoration: boxDecoration,
           child: Form(
             key: key,
             child: Padding(
@@ -155,4 +218,12 @@ class _TokenPageState extends State<TokenPage> {
     }
     return "Please enter a amount which is a number";
   }
+
+  Widget buildText(String transactionInfo, String transaction) => Padding(
+        padding: const EdgeInsets.only(left: 5, top: 5, bottom: 5),
+        child: Text(
+          transactionInfo + transaction,
+          style: const TextStyle(fontSize: 15),
+        ),
+      );
 }
