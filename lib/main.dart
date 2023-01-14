@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:provider/provider.dart';
 import 'package:ultimate_token/locator.dart';
 import 'package:ultimate_token/ui/token_page.dart';
@@ -9,6 +10,21 @@ Future main() async {
   setupLocator();
   await dotenv.load(fileName: "assets/.env");
   runApp(const MyApp());
+  configLoading();
+}
+
+void configLoading() {
+  EasyLoading.instance
+    ..indicatorType = EasyLoadingIndicatorType.cubeGrid
+    ..loadingStyle = EasyLoadingStyle.dark
+    ..indicatorSize = 45
+    ..radius = 10
+    ..progressColor = Colors.yellow
+    ..backgroundColor = Colors.green
+    ..indicatorColor = Colors.orange
+    ..textColor = Colors.red
+    ..userInteractions = true
+    ..dismissOnTap = false;
 }
 
 class MyApp extends StatelessWidget {
@@ -25,6 +41,7 @@ class MyApp extends StatelessWidget {
           primarySwatch: Colors.blue,
         ),
         home: const TokenPage(),
+        builder: EasyLoading.init(),
       ),
     );
   }

@@ -1,7 +1,10 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:provider/provider.dart';
 import 'package:ultimate_token/model/transaction.dart';
+import 'package:ultimate_token/viewmodel/user_model.dart';
 
 class TokenPage extends StatefulWidget {
   const TokenPage({Key? key}) : super(key: key);
@@ -37,6 +40,8 @@ class _TokenPageState extends State<TokenPage> {
 
   late Size size;
 
+  bool isProgress = false;
+
   @override
   Widget build(BuildContext context) {
     size = MediaQuery.of(context).size;
@@ -56,7 +61,7 @@ class _TokenPageState extends State<TokenPage> {
                   buildContainer(tokenAddressFormKey, [
                     buildTextFormField(
                         tokenAddressCnt, "Token Address", checkAddress),
-                    buildButton("Get Token Info"),
+                    buildButton("Get Token Info", getTokenInfo),
                     buildInfoText("Name: ", name),
                     buildInfoText("Symbol: ", symbol),
                     buildInfoText("Total Supply: ", totalSupply),
@@ -68,7 +73,7 @@ class _TokenPageState extends State<TokenPage> {
                             walletAddressCnt, "Wallet Address", checkAddress),
                       ),
                     ),
-                    buildButton("Get My Balance")
+                    buildButton("Get My Balance", () async {})
                   ]),
                   const Text(
                     "Transfer Token",
@@ -82,7 +87,7 @@ class _TokenPageState extends State<TokenPage> {
                       child: buildTextFormField(
                           amountCnt, "Amount to Transfer", checkAmount),
                     ),
-                    buildButton("Transfer")
+                    buildButton("Transfer", () async {})
                   ]),
                   const Text(
                     "Transactions",
@@ -188,18 +193,66 @@ class _TokenPageState extends State<TokenPage> {
     return null;
   }
 
-  Widget buildButton(String text) => ElevatedButton(
+  Widget buildButton(String text, Future Function() onPressed) =>
+      ElevatedButton(
+        onPressed: onPressed,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              text,
-              style: const TextStyle(fontSize: 15),
-            ),
+            !isProgress
+                ? Text(
+                    text,
+                    style: const TextStyle(fontSize: 15),
+                  )
+                : const Icon(Icons.lock)
           ],
         ),
-        onPressed: () {},
       );
+
+  Future getTokenInfo() async {
+    if (!isProgress) {
+      setState(() {
+        isProgress = true;
+      });
+      await EasyLoading.show(status: "Loading...");
+
+      if (tokenAddressFormKey.currentState!.validate()) {
+        try {
+          Map<String, String> tokenInfo =
+              await Provider.of<UserModel>(context, listen: false)
+                  .getTokenInfo(tokenAddressCnt.text);
+          setState(() {
+            name = tokenInfo["name"]!;
+            symbol = tokenInfo["symbol"]!;
+            totalSupply = tokenInfo["totalSupply"]!;
+
+            isProgress = false;
+          });
+          await EasyLoading.dismiss();
+        } catch (e) {
+          EasyLoading.showError("Failed to get token info");
+
+          setState(() {
+            isProgress = false;
+          });
+        }
+      } else {
+        showSnackBar();
+
+        setState(() {
+          isProgress = false;
+        });
+
+        EasyLoading.dismiss();
+      }
+    }
+  }
+
+  showSnackBar() {
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Please enter valid entry..."),
+        duration: Duration(seconds: 2)));
+  }
 
   Widget buildInfoText(String infoName, String info) => Padding(
         padding: const EdgeInsets.only(top: 10),
