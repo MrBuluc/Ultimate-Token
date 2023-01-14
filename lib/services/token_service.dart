@@ -48,4 +48,23 @@ class TokenService {
             [EthereumAddress.fromHex(walletAddress)]))[0])
         .toString();
   }
+
+  Future<String> callSetFunc(
+      String tokenAddress, String funcName, List params) async {
+    DeployedContract contract = await getContract(tokenAddress);
+    return await ethClient.sendTransaction(
+        EthPrivateKey.fromHex(dotenv.env["privateAddress"]!),
+        Transaction.callContract(
+            contract: contract,
+            function: contract.function(funcName),
+            parameters: params,
+            maxGas: 100000),
+        chainId: 5);
+  }
+
+  Future<String> sendToken(
+      String tokenAddress, String recipientAddress, BigInt amount) async {
+    return await callSetFunc(tokenAddress, "transfer",
+        [EthereumAddress.fromHex(recipientAddress), amount]);
+  }
 }

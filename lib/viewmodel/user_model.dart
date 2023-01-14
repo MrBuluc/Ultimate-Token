@@ -24,6 +24,17 @@ class UserModel with ChangeNotifier {
     }
   }
 
+  Future<String> sendToken(
+      String tokenAddress, String recipientAddress, int amount) async {
+    try {
+      return await userRepository.sendToken(
+          tokenAddress, recipientAddress, amount);
+    } catch (e) {
+      printError("sendToken", e);
+      rethrow;
+    }
+  }
+
   printError(String methodName, Object e) {
     print("Usermodel $methodName hata: " + e.toString());
   }

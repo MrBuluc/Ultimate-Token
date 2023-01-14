@@ -89,9 +89,10 @@ class _TokenPageState extends State<TokenPage> {
                     Padding(
                       padding: const EdgeInsets.only(top: 10),
                       child: buildTextFormField(
-                          amountCnt, "Amount to Transfer", checkAmount),
+                          amountCnt, "Amount to Transfer", checkAmount,
+                          textInputType: TextInputType.number),
                     ),
-                    buildButton("Transfer", () async {})
+                    buildButton("Transfer", sendToken)
                   ]),
                   const Text(
                     "Transactions",
@@ -311,6 +312,45 @@ class _TokenPageState extends State<TokenPage> {
       return null;
     }
     return "Please enter a amount which is a number";
+  }
+
+  Future sendToken() async {
+    if (!isProgress) {
+      setState(() {
+        isProgress = true;
+      });
+      EasyLoading.show(status: "Loading...");
+
+      if (tokenAddressFormKey.currentState!.validate() &&
+          transferFormKey.currentState!.validate()) {
+        try {
+          int amount = int.parse(amountCnt.text);
+
+          await Provider.of<UserModel>(context, listen: false).sendToken(
+              tokenAddressCnt.text, recipientAddressCnt.text, amount);
+
+          EasyLoading.showSuccess("Transfer token Success");
+
+          setState(() {
+            isProgress = false;
+          });
+        } catch (e) {
+          EasyLoading.showError("Failed to transfer token");
+
+          setState(() {
+            isProgress = false;
+          });
+        }
+      } else {
+        showSnackBar();
+
+        setState(() {
+          isProgress = false;
+        });
+
+        EasyLoading.dismiss();
+      }
+    }
   }
 
   Widget buildText(String transactionInfo, String transaction) => Padding(

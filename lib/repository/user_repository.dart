@@ -22,4 +22,10 @@ class UserRepository {
       String tokenAddress, String walletAddress) async {
     return await _tokenService.getTokenBalance(tokenAddress, walletAddress);
   }
+
+  Future<String> sendToken(
+      String tokenAddress, String recipientAddress, int amount) async {
+    return await _tokenService.sendToken(
+        tokenAddress, recipientAddress, BigInt.from(amount));
+  }
 }
