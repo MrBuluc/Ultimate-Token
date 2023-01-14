@@ -17,4 +17,9 @@ class UserRepository {
 
     return tokenInfo;
   }
+
+  Future<String> getTokenBalance(
+      String tokenAddress, String walletAddress) async {
+    return await _tokenService.getTokenBalance(tokenAddress, walletAddress);
+  }
 }

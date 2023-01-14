@@ -14,6 +14,16 @@ class UserModel with ChangeNotifier {
     }
   }
 
+  Future<String> getTokenBalance(
+      String tokenAddress, String walletAddress) async {
+    try {
+      return await userRepository.getTokenBalance(tokenAddress, walletAddress);
+    } catch (e) {
+      printError("getTokenBalance", e);
+      rethrow;
+    }
+  }
+
   printError(String methodName, Object e) {
     print("Usermodel $methodName hata: " + e.toString());
   }

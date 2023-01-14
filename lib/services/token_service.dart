@@ -41,4 +41,11 @@ class TokenService {
   Future<String> getTokenTotalSupply(String tokenAddress) async {
     return ((await callGetFunc(tokenAddress, "totalSupply", []))[0]).toString();
   }
+
+  Future<String> getTokenBalance(
+      String tokenAddress, String walletAddress) async {
+    return ((await callGetFunc(tokenAddress, "balanceOf",
+            [EthereumAddress.fromHex(walletAddress)]))[0])
+        .toString();
+  }
 }

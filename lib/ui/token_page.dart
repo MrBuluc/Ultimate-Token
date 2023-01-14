@@ -73,7 +73,11 @@ class _TokenPageState extends State<TokenPage> {
                             walletAddressCnt, "Wallet Address", checkAddress),
                       ),
                     ),
-                    buildButton("Get My Balance", () async {})
+                    buildButton("Get My Balance", getBalance),
+                    buildInfoText("Balance: ", balance),
+                    const SizedBox(
+                      height: 10,
+                    )
                   ]),
                   const Text(
                     "Transfer Token",
@@ -261,6 +265,43 @@ class _TokenPageState extends State<TokenPage> {
           style: const TextStyle(fontSize: 20),
         ),
       );
+
+  Future getBalance() async {
+    if (!isProgress) {
+      setState(() {
+        isProgress = true;
+      });
+      await EasyLoading.show(status: "Loading...");
+
+      if (tokenAddressFormKey.currentState!.validate() &&
+          walletAddressFormKey.currentState!.validate()) {
+        try {
+          String newBalance =
+              await Provider.of<UserModel>(context, listen: false)
+                  .getTokenBalance(tokenAddressCnt.text, walletAddressCnt.text);
+          setState(() {
+            balance = newBalance;
+            isProgress = false;
+          });
+          await EasyLoading.dismiss();
+        } catch (e) {
+          EasyLoading.showError("Failed to get balance");
+
+          setState(() {
+            isProgress = false;
+          });
+        }
+      } else {
+        showSnackBar();
+
+        setState(() {
+          isProgress = false;
+        });
+
+        EasyLoading.dismiss();
+      }
+    }
+  }
 
   String? checkAmount(String? value) {
     if (int.tryParse(value!) != null) {
