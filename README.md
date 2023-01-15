@@ -1,16 +1,25 @@
-# ultimate_token
+# Paribu-Hub-Akilli-Sozlesme-Solidity-Practicum Final Case ReadMe
 
-A new Flutter project.
+contracts/UltimateToken.sol dosyasında Ultimate Map ve Ultimate Token bulunmaktadır. Ultimate Token bir ERC-20 tokendır. ERC-20 den farklı olarak balances mapi Ultimate
+Mapdir. Bu sayede mapimizin değerlerine index bazlı erişebiliyoruz. Sadece kendi ihtiyaçım olan fonksiyonları içermektedir. Smart Contract Goerli Test Networküne deploy
+edilmiştir. Flutter ile deploy edilmiş token ile etkileşime geçmek için bir front-end geliştirilmiştir. Uygulamamız üzerinden adresi verilen herhangi bir ERC-20 token
+ile etkileşime geçilebilir.
 
-## Getting Started
+İçerisinde kullanılan yapılar :
+• Function
 
-This project is a starting point for a Flutter application.
+• Mapping
 
-A few resources to get you started if this is your first Flutter project:
+• Array
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+• Constructor
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+• Struct
+
+• Require
+
+• Modifier
+
+• Event
+
+Projenin videolu anlatımına ulaşabilirsiniz: https://www.loom.com/share/eafd4a12c8c64c59a69584c6ff09d4b5
