@@ -28,4 +28,8 @@ class UserRepository {
     return await _tokenService.sendToken(
         tokenAddress, recipientAddress, BigInt.from(amount));
   }
+
+  Future<List> listenEvent(String tokenAddress, String eventName) async {
+    return await _tokenService.listenEvent(tokenAddress, eventName);
+  }
 }

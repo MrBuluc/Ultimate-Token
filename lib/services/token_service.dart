@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart';
@@ -66,5 +68,18 @@ class TokenService {
       String tokenAddress, String recipientAddress, BigInt amount) async {
     return await callSetFunc(tokenAddress, "transfer",
         [EthereumAddress.fromHex(recipientAddress), amount]);
+  }
+
+  Future<List> listenEvent(String tokenAddress, String eventName) async {
+    List eventAndStream = [];
+    DeployedContract contract = await getContract(tokenAddress);
+    ContractEvent contractEvent = contract.event(eventName);
+    eventAndStream.add(contractEvent);
+
+    Stream<FilterEvent> stream = ethClient
+        .events(FilterOptions.events(contract: contract, event: contractEvent));
+    eventAndStream.add(stream);
+
+    return eventAndStream;
   }
 }

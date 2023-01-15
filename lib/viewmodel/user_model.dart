@@ -35,6 +35,15 @@ class UserModel with ChangeNotifier {
     }
   }
 
+  Future<List> listenEvent(String tokenAddress, String eventName) async {
+    try {
+      return await userRepository.listenEvent(tokenAddress, eventName);
+    } catch (e) {
+      printError("listenEvent", e);
+      rethrow;
+    }
+  }
+
   printError(String methodName, Object e) {
     print("Usermodel $methodName hata: " + e.toString());
   }

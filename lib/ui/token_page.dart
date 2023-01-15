@@ -3,8 +3,11 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:provider/provider.dart';
-import 'package:ultimate_token/model/transaction.dart';
+import 'package:ultimate_token/model/transfer.dart';
 import 'package:ultimate_token/viewmodel/user_model.dart';
+import 'package:url_launcher/url_launcher_string.dart';
+import 'package:web3dart/contracts.dart';
+import 'package:web3dart/web3dart.dart';
 
 class TokenPage extends StatefulWidget {
   const TokenPage({Key? key}) : super(key: key);
@@ -18,14 +21,17 @@ class _TokenPageState extends State<TokenPage> {
   GlobalKey<FormState> walletAddressFormKey = GlobalKey<FormState>();
   GlobalKey<FormState> transferFormKey = GlobalKey<FormState>();
 
-  TextEditingController tokenAddressCnt = TextEditingController();
-  TextEditingController walletAddressCnt = TextEditingController();
-  TextEditingController recipientAddressCnt = TextEditingController();
-  TextEditingController amountCnt = TextEditingController();
+  TextEditingController tokenAddressCnt =
+      TextEditingController(text: "0x08c3DF9fb8F4aCC45cAC30c5c49d6b8546CC721A");
+  TextEditingController walletAddressCnt =
+      TextEditingController(text: "0x9C1DbFAa4c6480Bc59774643EED01d1b8D0B0F15");
+  TextEditingController recipientAddressCnt =
+      TextEditingController(text: "0x9C1DbFAa4c6480Bc59774643EED01d1b8D0B0F15");
+  TextEditingController amountCnt = TextEditingController(text: "100");
 
   String name = "", symbol = "", totalSupply = "", balance = "";
 
-  List<Transaction> transactions = [];
+  List<Transfer> transfers = [];
 
   Decoration boxDecoration = BoxDecoration(
       color: Colors.white,
@@ -106,10 +112,10 @@ class _TokenPageState extends State<TokenPage> {
                         children: [
                           ListView.builder(
                             physics: const NeverScrollableScrollPhysics(),
-                            itemCount: transactions.length,
+                            itemCount: transfers.length,
                             shrinkWrap: true,
                             itemBuilder: (context, index) {
-                              Transaction transaction = transactions[index];
+                              Transfer transaction = transfers[index];
                               return Card(
                                 color: Color(
                                         (math.Random().nextDouble() * 0xFFFFFF)
@@ -133,7 +139,9 @@ class _TokenPageState extends State<TokenPage> {
                                         TextButton(
                                           child: const Text(
                                               "Check in block explorer"),
-                                          onPressed: () {},
+                                          onPressed: () async {
+                                            await launchUrl(transaction.hash);
+                                          },
                                         ),
                                       ],
                                     )
@@ -226,6 +234,9 @@ class _TokenPageState extends State<TokenPage> {
           Map<String, String> tokenInfo =
               await Provider.of<UserModel>(context, listen: false)
                   .getTokenInfo(tokenAddressCnt.text);
+
+          await listenEvent();
+
           setState(() {
             name = tokenInfo["name"]!;
             symbol = tokenInfo["symbol"]!;
@@ -251,6 +262,26 @@ class _TokenPageState extends State<TokenPage> {
         EasyLoading.dismiss();
       }
     }
+  }
+
+  Future listenEvent() async {
+    List eventAndStream = await Provider.of<UserModel>(context, listen: false)
+        .listenEvent(tokenAddressCnt.text, "Transfer");
+    ContractEvent contractEvent = eventAndStream[0] as ContractEvent;
+    Stream<FilterEvent> stream = eventAndStream[1] as Stream<FilterEvent>;
+
+    stream.listen((event) {
+      List decoded = contractEvent.decodeResults(event.topics!, event.data!);
+      String from = (decoded[0] as EthereumAddress).toString();
+      String to = (decoded[1] as EthereumAddress).toString();
+      String amount = (decoded[2] as BigInt).toString();
+      String hash = event.transactionHash!;
+      Transfer transfer =
+          Transfer(from: from, to: to, amount: amount, hash: hash);
+      setState(() {
+        transfers.add(transfer);
+      });
+    });
   }
 
   showSnackBar() {
@@ -360,4 +391,12 @@ class _TokenPageState extends State<TokenPage> {
           style: const TextStyle(fontSize: 15),
         ),
       );
+
+  Future launchUrl(String transactionHash) async {
+    String etherScanUrl = "https://goerli.etherscan.io/tx/$transactionHash";
+
+    if (await canLaunchUrlString(etherScanUrl)) {
+      await launchUrlString(etherScanUrl);
+    }
+  }
 }
