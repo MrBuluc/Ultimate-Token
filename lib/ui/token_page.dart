@@ -21,13 +21,10 @@ class _TokenPageState extends State<TokenPage> {
   GlobalKey<FormState> walletAddressFormKey = GlobalKey<FormState>();
   GlobalKey<FormState> transferFormKey = GlobalKey<FormState>();
 
-  TextEditingController tokenAddressCnt =
-      TextEditingController(text: "0x08c3DF9fb8F4aCC45cAC30c5c49d6b8546CC721A");
-  TextEditingController walletAddressCnt =
-      TextEditingController(text: "0x9C1DbFAa4c6480Bc59774643EED01d1b8D0B0F15");
-  TextEditingController recipientAddressCnt =
-      TextEditingController(text: "0x9C1DbFAa4c6480Bc59774643EED01d1b8D0B0F15");
-  TextEditingController amountCnt = TextEditingController(text: "100");
+  TextEditingController tokenAddressCnt = TextEditingController();
+  TextEditingController walletAddressCnt = TextEditingController();
+  TextEditingController recipientAddressCnt = TextEditingController();
+  TextEditingController amountCnt = TextEditingController();
 
   String name = "", symbol = "", totalSupply = "", balance = "";
 
